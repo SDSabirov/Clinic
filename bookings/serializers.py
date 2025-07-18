@@ -9,4 +9,4 @@ class PatientSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['id', 'patient', 'doctor', 'scheduled_at', 'notes', 'created_at', 'updated_at']
+        fields = ['id', 'patient', 'doctor', 'scheduled_at', 'notes', 'created_at', 'updated_at','total']

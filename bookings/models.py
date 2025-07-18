@@ -39,7 +39,13 @@ class Booking(models.Model):
     )
     scheduled_at = models.DateTimeField()
     notes        = models.TextField(blank=True)
-
+    total = models.DecimalField(
+                max_digits=12,         # Total digits (example: 99999999.99)
+                decimal_places=2,      # For cents/pence
+                null=True,            
+                blank=True,           
+                default=0             
+            )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
