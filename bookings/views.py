@@ -1,6 +1,6 @@
-from rest_framework import viewsets, permissions,generics
+from rest_framework import viewsets, permissions,generics,serializers
 from .models import Patient, Booking
-from .serializers import PatientSerializer, BookingSerializer
+from .serializers import PatientSerializer, BookingSerializer, PublicBookingSerializer
 
 class PatientViewSet(viewsets.ModelViewSet):
     """
@@ -26,13 +26,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         # If receptionist or superuser, see all bookings
         return self.queryset
     
-
 class PublicBookingCreateAPIView(generics.CreateAPIView):
     queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
+    serializer_class = PublicBookingSerializer
     permission_classes = [permissions.AllowAny]  # Anyone can create
-
-    # Optionally, you can override perform_create for custom logic/validation
-    def perform_create(self, serializer):
-        # e.g., send notification, sanitize input, etc.
-        serializer.save()

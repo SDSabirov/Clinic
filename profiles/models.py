@@ -48,20 +48,26 @@ class BaseProfile(models.Model):
     def __str__(self):
         return getattr(self.user, 'get_full_name', lambda: str(self.user))()
 
+class Specialty(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class DoctorProfile(BaseProfile):
     """
     Profile for doctor users with clinical credentials and availability.
     """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': settings.AUTH_USER_MODEL.replace('.', '') == 'DOCTOR'},
-        related_name='doctor_profile'
-    )
-    specialty = models.CharField(
+   
+    main_specialty = models.CharField(
         max_length=100,
         help_text=_("Medical specialty, e.g., 'Cardiology'")
+    )
+    other_specialties = models.ManyToManyField(
+        Specialty,
+        related_name='doctors',
+        blank=True,
+        help_text=_("Other specialties for the doctor")
     )
     qualifications = models.CharField(
         max_length=255,
@@ -88,7 +94,7 @@ class DoctorProfile(BaseProfile):
         verbose_name = _("Doctor Profile")
         verbose_name_plural = _("Doctor Profiles")
         indexes = [
-            models.Index(fields=['specialty']),
+            models.Index(fields=['main_specialty']),
             models.Index(fields=['license_number']),
         ]
 
@@ -99,19 +105,46 @@ class DoctorProfile(BaseProfile):
 
     def __str__(self):
         name = self.user.get_full_name() or self.user.username
-        return f"Dr. {name} ({self.specialty})"
+        return f"Dr. {name} ({self.main_specialty})"
+
+#achievments for doctor that will be educations certification internship etc     
+class Achievement(models.Model):
+    EDUCATION = 'education'
+    INTERNSHIP = 'internship'
+    CERTIFICATION = 'certification'
+    ACHIEVEMENT_TYPES = [
+        (EDUCATION, 'Education'),
+        (INTERNSHIP, 'Internship'),
+        (CERTIFICATION, 'Certification'),
+    ]
+
+    doctor = models.ForeignKey(
+        'DoctorProfile',
+        related_name='achievements',
+        on_delete=models.CASCADE
+    )
+    type = models.CharField(
+        max_length=20,
+        choices=ACHIEVEMENT_TYPES
+    )
+    name = models.CharField(max_length=255, help_text="Degree, Certification, or Internship Name")
+    institution = models.CharField(max_length=255, blank=True, help_text="Where it was earned")
+    year = models.PositiveSmallIntegerField(blank=True, null=True)
+    details = models.TextField(blank=True, help_text="Additional info (optional)")
+
+    class Meta:
+        verbose_name = "Achievement"
+        verbose_name_plural = "Achievements"
+
+    def __str__(self):
+        return f"{self.get_type_display()}: {self.name} ({self.institution})"
 
 
 class ReceptionistProfile(BaseProfile):
     """
     Profile for receptionist users with shift details.
     """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': settings.AUTH_USER_MODEL.replace('.', '') == 'RECEPTIONIST'},
-        related_name='receptionist_profile'
-    )
+ 
     phone_extension = models.CharField(
         max_length=10,
         blank=True,

@@ -7,5 +7,5 @@ router.register(r'patients', PatientViewSet)
 router.register(r'bookings', BookingViewSet)
 
 urlpatterns = router.urls + [
-    path('bookings/public-create/', PublicBookingCreateAPIView.as_view(), name='public_booking_create'),
+    path('public-create/', PublicBookingCreateAPIView.as_view(), name='public_booking_create'),
 ]
